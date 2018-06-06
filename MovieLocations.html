@@ -1,0 +1,249 @@
+﻿<!doctype html>
+<html>
+    <head>
+      <meta charset="utf-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width">
+    	<title>SF Movie Locations</title>
+    	<link rel="stylesheet" href="main.css" type="text/css" media="screen, projection" />
+    	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    </head>
+<body>
+<form>
+<div class="movie-header">
+    <div id="my-app">SF Movie Locations</div>
+      <div id="find">
+        <label>Search</label>
+          <input type="hidden" id="num" value="25"/>
+          <input type="search" id="mySearch" name="q" maxlength="40" size="40" placeholder="Movie Titles, Years"/>
+          <input id="data" type="button" value="GO" />
+      </div>
+  </div>
+ <div class="sort">
+    <label>Sort by:</label>
+  </div>
+      <div id="toggle">
+          <label>Sort By:</label>
+          <label class="switch">
+            <input id="swit" type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+      </div>
+</form>
+<div id="movie-info">
+<table id="films" class="table-bordered">
+                        <thead></thead>
+                        <tbody class="searchresulttable"></tbody>
+                        
+</table>
+    <div id="more">
+         <input type="button" id="more" value="Loadmore"/>
+    </div>
+</div>
+    <script>
+        $("#more").click(function () {
+            $("#num").val($("#films")[0].children[1].childElementCount + 25);
+        $.ajax({
+                    url: 'https://data.sfgov.org/resource/wwmu-gmzc.json',
+                    type: 'GET',
+                    dataType: 'json',
+                    cache: false,
+
+                    success: function (data) {
+                        let groupedBy = [];
+          
+                      
+                  if($("#swit")[0].checked)
+                  {
+                        data.sort(function(a, b) {
+                          return a.title > b.title;
+                         });
+                        data.sort();
+                        var groupByTitle = function (xs, key) {
+                            return xs.reduce(function (rv, x) {
+                                (rv[x[key].charAt(0)] = rv[x[key].charAt(0)] || []).push(x);
+                                return rv;
+                            }, {});
+                        };
+                         groupedBy = groupByTitle(data, 'title');
+                    }
+                    else
+                    {
+                             data.sort(function(a, b) {
+                              return a.release_year - b.release_year;
+                           });
+
+                             data.sort();
+                             var groupBy = function (xs, key) {
+                                 return xs.reduce(function (rv, x) {
+                                     (rv[x[key]] = rv[x[key]] || []).push(x);
+                                     return rv;
+                                 }, {});
+                             };
+                              groupedBy = groupBy(data, 'release_year');
+                      }
+                 $('.searchresulttable').html(' ');
+                        let categories = Object.keys(groupedBy);
+                        let n = 0;
+                        Object.keys(groupedBy).forEach(function (category) {
+                        debugger;
+                        if (n <= ($("#num").val())) {
+                        $('.searchresulttable').append('<tr><td>' + category + '</td></tr><br/>');
+
+                          groupedBy[category].forEach(function (memb, i) {
+                              n = n+1;
+                              if (n <= ($("#num").val())) {
+                                  $('.searchresulttable').append('<div id="MovieBox"><div class="moviedetails"><div class="movietitle">' + memb.title + '</div><div class="movieyear">' + memb.release_year + '</div></div>' + ' ' + '<div class="movielocation">' + memb.locations + '</div></div>');
+
+                              }
+
+                          })
+                      }
+                  });
+
+
+                           }
+
+                });
+
+})
+    </script>
+<script>
+    $("#swit").click(function () {
+        $("#mySearch").val('');
+        $.ajax({
+                    url: 'https://data.sfgov.org/resource/wwmu-gmzc.json',
+                    type: 'GET',
+                    dataType: 'json',
+                    cache: false,
+                    success: function (data) {
+                        let groupedBy = [];
+                  if($("#swit")[0].checked)
+                  {
+                        data.sort(function(a, b) {
+                          return a.title > b.title;
+                         });
+                        data.sort();
+                        var groupByTitle = function (xs, key) {
+                            return xs.reduce(function (rv, x) {
+                                (rv[x[key].charAt(0)] = rv[x[key].charAt(0)] || []).push(x);
+                                return rv;
+                            }, {});
+                        };
+                         groupedBy = groupByTitle(data, 'title');
+                    }
+                    else
+                    {
+                             data.sort(function(a, b) {
+                               return a.release_year - b.release_year;
+                              });
+                             data.sort();
+                             var groupBy = function (xs, key) {
+                                 return xs.reduce(function (rv, x) {
+                                     (rv[x[key]] = rv[x[key]] || []).push(x);
+                                     return rv;
+                                 }, {});
+                             };
+                              groupedBy = groupBy(data, 'release_year');
+                      }
+                  $('.searchresulttable').html(' ');
+                      let n=0;
+                      Object.keys(groupedBy).forEach(function (category) {
+                       if (n <= 25) {
+                        $('.searchresulttable').append('<tr><td>' + category + '</td></tr><br/>');
+                              groupedBy[category].forEach(function (memb, i) {
+                                  n = n+1;
+                                  if (n <= 25) {
+                                      $('.searchresulttable').append('<div id="MovieBox"><div class="moviedetails"><div class="movietitle">' + memb.title + '</div><div class="movieyear">' + memb.release_year + '</div></div>' + ' ' + '<div class="movielocation">' + memb.locations + '</div></div>');
+                                  }
+                          })
+                       }
+                      });
+                    }
+
+        });
+            
+})
+</script>
+<script>
+function group(array, key) {
+  console.log(array);
+  let finalArray = [];
+
+  array.forEach(function(element) {
+    var newArray = [];
+    array.forEach(function(element1) {
+      if (element[key] == element1[key]) {
+          newArray.push(element1)
+      }
+    });
+    if (!(finalArray.some(arrVal => newArray[0][key] == arrVal[0][key]))) {
+         finalArray.push(newArray);
+   }
+  });
+  return finalArray
+}
+
+
+$('#data').click(function () {
+    let search = $("#mySearch").val();
+   
+  
+                $.ajax({
+                    url: 'https://data.sfgov.org/resource/wwmu-gmzc.json',
+                    type: 'GET',
+                    dataType: 'json',
+                    cache: false,
+                    success: function (data) {
+                        let newData = [];
+                        if (search != null) {
+                            if (search.trim().length > 0) {
+                                if (isNaN(search)) {
+                                    newData = jQuery.grep(data, function (product, i) {
+                                        return product.title.toLowerCase().indexOf(search.toLowerCase())>0;
+                                    });
+                                    data = newData;
+                                }
+                                else {
+                                    newData = jQuery.grep(data, function (product, i) {
+                                        return product.release_year == search;
+                                    });
+                                    data = newData;
+                                }
+                            }
+                        }
+                       
+                        data.sort(function(a, b) {
+                          return a.title > b.title;
+                         });
+                        data.sort();
+                       var groupByTitle = function (xs, key) {
+                            return xs.reduce(function (rv, x) {
+                                (rv[x[key].charAt(0)] = rv[x[key].charAt(0)] || []).push(x);
+                                return rv;
+                            }, {});
+                        };
+                        let groubedByTeam = groupByTitle(data, 'title');
+                        $('.searchresulttable').html(' ');
+                         let n = 0;
+                         Object.keys(groubedByTeam).forEach(function (category) {
+                             if (n <= 25) {
+                                 $('.searchresulttable').append('<tr><td>' + category + '</td></tr><br/>');
+
+                                 groubedByTeam[category].forEach(function (memb, i) {
+                                     n = n+1;
+                                     if (n <= 25) {
+                                       
+                                         $('.searchresulttable').append('<div id="MovieBox"><div class="moviedetails"><div class="movietitle">' + memb.title + '</div><div class="movieyear">' + memb.release_year + '</div></div>' + ' ' + '<div class="movielocation">' + memb.locations + '</div></div>');
+                                     }
+                                 })
+                             }
+                         });
+
+}
+                });
+            });
+
+</script>
+</body>
+</html>
